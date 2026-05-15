@@ -9,16 +9,18 @@ const api = {
      * Protokol transmisi data ke Google Apps Script (Ubah data/Tulis)
      * Menggunakan Content-Type text/plain untuk mem-bypass restriksi preflight CORS
      */
-    post: async function(action, payload) {
+post: async function(action, payload) {
         try {
             const response = await fetch(GAS_WEB_APP_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify({ action: action, data: payload })
             });
-            return { status: "dispatched" }; 
+            // Membaca dan mengembalikan respons absolut dari GAS
+            return await response.json(); 
         } catch (error) {
             console.error(`[Saintifiks API] Kegagalan transmisi POST pada aksi: ${action}`, error);
+            throw error;
         }
     },
 
