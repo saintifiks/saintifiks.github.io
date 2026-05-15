@@ -120,5 +120,45 @@
             }
         });
     </script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const startTime = Date.now();
+            const articleId = window.location.pathname.split('/').pop().replace('.html', '') || 'beranda';
+            
+            // Menggunakan visibilitychange sebagai pemicu paling andal di web modern
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') {
+                    const durationSeconds = Math.floor((Date.now() - startTime) / 1000);
+                    
+                    // Abaikan sesi pembacaan kurang dari 5 detik (dianggap bounce/salah klik)
+                    if (durationSeconds < 5) return;
+
+                    const token = localStorage.getItem('saintifiks_token');
+                    let identifier = 'anonymous';
+                    
+                    // Jika pengguna pernah login, ekstrak email dari token lokal
+                    if (token) {
+                        try {
+                            const payload = JSON.parse(atob(token.split('.')[1]));
+                            identifier = payload.email;
+                        } catch (e) {}
+                    }
+
+                    const payload = {
+                        action: 'track_session',
+                        data: {
+                            identifier: identifier,
+                            article_id: articleId,
+                            duration_seconds: durationSeconds
+                        }
+                    };
+
+                    // Eksekusi sendBeacon untuk mem-bypass pemutusan koneksi saat tab ditutup
+                    const blob = new Blob([JSON.stringify(payload)], {type : 'text/plain;charset=utf-8'});
+                    navigator.sendBeacon(GAS_WEB_APP_URL, blob);
+                }
+            });
+        });
+    </script>
 </body>
 </html>
