@@ -60,6 +60,57 @@
         <blockquote class="pull-quote">
             "Manipulasi informasi seringkali bukan berupa kebohongan total, melainkan pemotongan konteks statistik secara presisi."
         </blockquote>
+
+        <div style="margin-top: var(--spacing-lg); padding-top: var(--spacing-md); border-top: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px;">
+            <button id="btn-like" style="background: var(--base-black); color: var(--base-white); border: none; padding: 8px 16px; font-family: var(--font-tertiary); font-weight: bold; text-transform: uppercase; cursor: pointer;">
+                Berikan Reaksi
+            </button>
+            <span id="like-status" style="font-family: var(--font-secondary); font-size: 0.85rem;"></span>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const btnLike = document.getElementById('btn-like');
+                const statusText = document.getElementById('like-status');
+                
+                // Mengekstraksi nama file artikel secara dinamis untuk dijadikan ID Artikel (misal: template)
+                const articleId = window.location.pathname.split('/').pop().replace('.html', '') || 'beranda';
+
+                btnLike.addEventListener('click', async () => {
+                    const token = localStorage.getItem('saintifiks_token');
+                    
+                    if (!token) {
+                        statusText.textContent = "Ditolak: Otentikasi Google diperlukan.";
+                        statusText.style.color = "var(--accent-red)";
+                        if (typeof google !== 'undefined') google.accounts.id.prompt();
+                        return;
+                    }
+
+                    statusText.textContent = "Memverifikasi integritas data...";
+                    statusText.style.color = "var(--base-black)";
+                    btnLike.disabled = true;
+                    
+                    try {
+                        const result = await api.post('like_article', { token: token, article_id: articleId });
+                        
+                        if (result.status === 'success') {
+                            statusText.textContent = `Valid. Total reaksi: ${result.new_count}`;
+                            statusText.style.color = "var(--accent-blue)";
+                            btnLike.style.background = "#555";
+                        } else if (result.status === 'rejected') {
+                            statusText.textContent = "Ditolak: Duplikasi. Anda telah mencatat reaksi pada artikel ini.";
+                            statusText.style.color = "var(--accent-red)";
+                        } else {
+                            statusText.textContent = "Anomali server terdeteksi.";
+                        }
+                    } catch (err) {
+                        statusText.textContent = "Koneksi infrastruktur terputus.";
+                        statusText.style.color = "var(--accent-red)";
+                        btnLike.disabled = false;
+                    }
+                });
+            });
+        </script>
     </main>
 
     <script>
