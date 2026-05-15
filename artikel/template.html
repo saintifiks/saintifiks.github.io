@@ -126,26 +126,21 @@
             const articleId = window.location.pathname.split('/').pop().replace('.html', '') || 'beranda';
             
             document.addEventListener('visibilitychange', () => {
-                // Memicu transmisi saat tab ditutup atau disembunyikan
+                // Memicu transmisi saat tab ditutup, disembunyikan, atau saat Anda berpindah tab
                 if (document.visibilityState === 'hidden') {
                     const durationSeconds = Math.floor((Date.now() - startTime) / 1000);
                     
-                    // Abaikan pembacaan di bawah 5 detik (bounce)
                     if (durationSeconds < 5) return;
 
                     const token = localStorage.getItem('saintifiks_token');
                     let identifier = 'anonymous';
                     
-                    // Ekstraksi email dari JWT token lokal
                     if (token) {
                         try {
-                            // Konversi format Base64URL JWT ke Base64 standar sebelum dekripsi
                             const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
                             const payload = JSON.parse(atob(base64));
                             identifier = payload.email;
-                        } catch (e) {
-                            console.error("[Saintifiks Tracker] Gagal mengekstraksi identitas.", e);
-                        }
+                        } catch (e) {}
                     }
 
                     const payload = {
@@ -157,9 +152,10 @@
                         }
                     };
 
-                    // Gunakan fetch dengan parameter keepalive untuk mem-bypass pemutusan koneksi tab
+                    // mode: 'no-cors' memaksa peramban mengabaikan pengalihan 302 dari GAS
                     fetch(GAS_WEB_APP_URL, {
                         method: 'POST',
+                        mode: 'no-cors',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify(payload),
                         keepalive: true
