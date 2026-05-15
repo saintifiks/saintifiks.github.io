@@ -28,7 +28,17 @@ function renderUserProfile() {
 }
 
 function renderLoginButton(container) {
-    container.innerHTML = `<button onclick="if(typeof google !== 'undefined') google.accounts.id.prompt();" style="background: none; color: var(--base-black); border: none; font-family: var(--font-tertiary); font-size: 0.85rem; font-weight: bold; text-transform: uppercase; cursor: pointer; letter-spacing: 1px;">Login</button>`;
+    container.innerHTML = ''; // Mengosongkan kontainer
+    
+    // Merender tombol resmi Google untuk bypass restriksi Incognito
+    if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+        google.accounts.id.renderButton(
+            container,
+            { theme: "filled_black", size: "medium", shape: "rectangular", text: "signin" }
+        );
+    } else {
+        container.innerHTML = `<span style="font-family: var(--font-tertiary); font-size: 0.85rem; font-weight: bold; text-transform: uppercase; color: var(--base-black);">Koneksi Google Terputus</span>`;
+    }
 }
 
 function handleCredentialResponse(response) {
