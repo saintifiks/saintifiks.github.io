@@ -72,10 +72,57 @@
             document.addEventListener('DOMContentLoaded', () => {
                 const btnLike = document.getElementById('btn-like');
                 const statusText = document.getElementById('like-status');
-                
-                // Mengekstraksi nama file artikel secara dinamis untuk dijadikan ID Artikel (misal: template)
                 const articleId = window.location.pathname.split('/').pop().replace('.html', '') || 'beranda';
 
+                // Fungsi utilitas dekripsi JWT lokal secara murni
+                function getUserEmailLocally() {
+                    const token = localStorage.getItem('saintifiks_token');
+                    if (!token) return null;
+                    try {
+                        const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+                        const payload = JSON.parse(atob(base64));
+                        return payload.email;
+                    } catch (e) {
+                        return null;
+                    }
+                }
+
+                // Initial Load: Menarik status pangkalan data
+                async function initLikeStatus() {
+                    btnLike.disabled = true;
+                    statusText.textContent = "Memuat parameter...";
+                    statusText.style.color = "#555";
+
+                    const email = getUserEmailLocally();
+                    const params = { article_id: articleId };
+                    if (email) params.email = email;
+
+                    try {
+                        const result = await api.get('get_article_status', params);
+                        
+                        if (result.status === 'success') {
+                            if (result.has_liked) {
+                                btnLike.disabled = true;
+                                btnLike.style.background = "#555";
+                                btnLike.textContent = "Reaksi Tercatat";
+                                statusText.textContent = `Valid. Total reaksi: ${result.like_count}`;
+                                statusText.style.color = "var(--accent-blue)";
+                            } else {
+                                btnLike.disabled = false;
+                                statusText.textContent = result.like_count > 0 ? `Total reaksi: ${result.like_count}` : "Belum ada reaksi.";
+                                statusText.style.color = "var(--base-black)";
+                            }
+                        } else {
+                            statusText.textContent = "Gagal memuat metrik.";
+                            btnLike.disabled = false;
+                        }
+                    } catch (err) {
+                        statusText.textContent = "Koneksi terputus.";
+                        btnLike.disabled = false;
+                    }
+                }
+
+                // Protokol Transmisi Reaksi Baru
                 btnLike.addEventListener('click', async () => {
                     const token = localStorage.getItem('saintifiks_token');
                     
@@ -97,11 +144,13 @@
                             statusText.textContent = `Valid. Total reaksi: ${result.new_count}`;
                             statusText.style.color = "var(--accent-blue)";
                             btnLike.style.background = "#555";
+                            btnLike.textContent = "Reaksi Tercatat";
                         } else if (result.status === 'rejected') {
-                            statusText.textContent = "Ditolak: Duplikasi. Anda telah mencatat reaksi pada artikel ini.";
+                            statusText.textContent = "Ditolak: Duplikasi.";
                             statusText.style.color = "var(--accent-red)";
                         } else {
                             statusText.textContent = "Anomali server terdeteksi.";
+                            btnLike.disabled = false;
                         }
                     } catch (err) {
                         statusText.textContent = "Koneksi infrastruktur terputus.";
@@ -109,6 +158,9 @@
                         btnLike.disabled = false;
                     }
                 });
+
+                // Eksekusi Pemuatan
+                initLikeStatus();
             });
         </script>
         <div style="margin-top: var(--spacing-lg); padding-top: var(--spacing-lg); border-top: 2px solid var(--base-black);">
