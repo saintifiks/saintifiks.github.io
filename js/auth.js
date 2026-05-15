@@ -4,11 +4,41 @@
 
 const GOOGLE_CLIENT_ID = "217988776417-qkei6r1jaki7cviupgegaop1f4hgldi3.apps.googleusercontent.com";
 
+// Utilitas Pembongkar JWT & Rendering Profil
+function renderUserProfile() {
+    const container = document.getElementById('user-profile-container');
+    if (!container) return;
+
+    const token = localStorage.getItem('saintifiks_token');
+    if (token) {
+        try {
+            const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+            const payload = JSON.parse(atob(base64));
+            const pictureUrl = payload.picture;
+            const name = payload.name;
+
+            // Merender foto profil Google bentuk bundar
+            container.innerHTML = `<img src="${pictureUrl}" alt="${name}" title="${name}" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--base-black); object-fit: cover;">`;
+        } catch (e) {
+            renderLoginButton(container);
+        }
+    } else {
+        renderLoginButton(container);
+    }
+}
+
+function renderLoginButton(container) {
+    container.innerHTML = `<button onclick="if(typeof google !== 'undefined') google.accounts.id.prompt();" style="background: none; color: var(--base-black); border: none; font-family: var(--font-tertiary); font-size: 0.85rem; font-weight: bold; text-transform: uppercase; cursor: pointer; letter-spacing: 1px;">Login</button>`;
+}
+
 function handleCredentialResponse(response) {
     console.log("[Saintifiks Auth] Token identitas diterima dari Google.");
     
     // Simpan token secara statis di memori lokal klien
     localStorage.setItem('saintifiks_token', response.credential);
+    
+    // Perbarui UI Header secara instan tanpa memuat ulang halaman
+    renderUserProfile();
     
     if (typeof api !== 'undefined') {
         api.post('verify_login', { token: response.credential })
@@ -31,11 +61,14 @@ function initGoogleAuth() {
         cancel_on_tap_outside: false
     });
 
-    // Pengecekan token: Jangan tampilkan pop-up jika pengguna sudah login sebelumnya
     const existingToken = localStorage.getItem('saintifiks_token');
     if (!existingToken) {
         google.accounts.id.prompt();
     }
 }
 
-window.addEventListener('load', initGoogleAuth);
+// Menjalankan modul & merender profil setelah DOM termuat
+window.addEventListener('load', () => {
+    initGoogleAuth();
+    renderUserProfile();
+});
