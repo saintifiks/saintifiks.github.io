@@ -111,6 +111,94 @@
                 });
             });
         </script>
+        <div style="margin-top: var(--spacing-lg); padding-top: var(--spacing-lg); border-top: 2px solid var(--base-black);">
+            <h3 style="font-family: var(--font-tertiary); text-transform: uppercase; font-size: 1rem; margin-bottom: var(--spacing-md);">Diskusi Publik</h3>
+
+            <div id="comments-container" style="margin-bottom: var(--spacing-lg);">
+                <p style="font-family: var(--font-secondary); font-size: 0.85rem; color: #555;">Memuat parameter data...</p>
+            </div>
+
+            <div id="comment-form-wrapper">
+                <textarea id="comment-input" rows="4" placeholder="Tulis analisis atau tanggapan Anda..." style="width: 100%; padding: var(--spacing-sm); font-family: var(--font-primary); font-size: 1rem; border: 1px solid var(--border-color); margin-bottom: var(--spacing-sm); resize: vertical;"></textarea>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button id="btn-submit-comment" style="background: var(--base-black); color: var(--base-white); border: none; padding: 8px 16px; font-family: var(--font-tertiary); font-weight: bold; text-transform: uppercase; cursor: pointer;">
+                        Kirim Tanggapan
+                    </button>
+                    <span id="comment-status" style="font-family: var(--font-secondary); font-size: 0.85rem;"></span>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const articleId = window.location.pathname.split('/').pop().replace('.html', '') || 'beranda';
+                const commentsContainer = document.getElementById('comments-container');
+                const btnSubmit = document.getElementById('btn-submit-comment');
+                const commentInput = document.getElementById('comment-input');
+                const commentStatus = document.getElementById('comment-status');
+
+                async function loadComments() {
+                    try {
+                        const result = await api.get('get_comments', { article_id: articleId });
+                        if (result.status === 'success') {
+                            commentsContainer.innerHTML = '';
+                            if (result.data.length === 0) {
+                                commentsContainer.innerHTML = '<p style="font-family: var(--font-secondary); font-size: 0.85rem; color: #555;">Belum ada diskusi tercatat.</p>';
+                                return;
+                            }
+                            result.data.forEach(c => {
+                                const date = new Date(c.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                                commentsContainer.innerHTML += `
+                                    <div style="margin-bottom: var(--spacing-md); padding-bottom: var(--spacing-sm); border-bottom: 1px solid var(--border-color);">
+                                        <div style="font-family: var(--font-tertiary); font-weight: bold; font-size: 0.85rem; margin-bottom: 4px;">${c.name} <span style="font-weight: normal; color: #777;">• ${date}</span></div>
+                                        <div style="font-family: var(--font-primary); font-size: 0.95rem;">${c.content}</div>
+                                    </div>
+                                `;
+                            });
+                        }
+                    } catch (err) {
+                        commentsContainer.innerHTML = '<p style="color: var(--accent-red); font-family: var(--font-secondary); font-size: 0.85rem;">Kegagalan memuat data dari pangkalan.</p>';
+                    }
+                }
+
+                btnSubmit.addEventListener('click', async () => {
+                    const token = localStorage.getItem('saintifiks_token');
+                    const content = commentInput.value.trim();
+
+                    if (!token) {
+                        commentStatus.textContent = "Ditolak: Otentikasi Google diperlukan.";
+                        commentStatus.style.color = "var(--accent-red)";
+                        if (typeof google !== 'undefined') google.accounts.id.prompt();
+                        return;
+                    }
+
+                    if (!content) return;
+
+                    btnSubmit.disabled = true;
+                    commentStatus.textContent = "Transmisi berjalan...";
+                    commentStatus.style.color = "var(--base-black)";
+
+                    try {
+                        const result = await api.post('add_comment', { token: token, article_id: articleId, content: content });
+                        if (result.status === 'success') {
+                            commentInput.value = '';
+                            commentStatus.textContent = "Terkonfirmasi.";
+                            commentStatus.style.color = "var(--accent-blue)";
+                            loadComments();
+                        } else {
+                            commentStatus.textContent = "Transmisi ditolak.";
+                            commentStatus.style.color = "var(--accent-red)";
+                        }
+                    } catch (err) {
+                        commentStatus.textContent = "Koneksi terputus.";
+                        commentStatus.style.color = "var(--accent-red)";
+                    }
+                    btnSubmit.disabled = false;
+                });
+
+                loadComments();
+            });
+        </script>
     </main>
 
     <script>
