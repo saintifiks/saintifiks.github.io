@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Judul Artikel - Saintifiks</title>
+    
+    <link rel="stylesheet" href="../css/saintifiks.css">
+    
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    
+    <script src="../js/api.js" defer></script>
+    <script src="../js/auth.js" defer></script>
+    <script src="../js/saintifiks-charts.js" defer></script>
+</head>
+<body>
+    <header style="border-bottom: 2px solid var(--base-black); padding: var(--spacing-md) 0; margin-bottom: var(--spacing-lg);">
+        <div style="max-width: var(--content-width); margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 var(--spacing-md);">
+            <div style="font-family: var(--font-primary); font-weight: 700; font-size: 1.5rem; letter-spacing: -1px;">
+                <a href="../index.html" style="color: var(--base-black); text-decoration: none;">SAINTIFIKS</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <span class="kicker">Kategori Makroekonomi</span>
+        <h1>Judul Analisis Berbasis Data Menggunakan Libre Baskerville</h1>
+        
+        <p>Paragraf pembuka. Gunakan kelas <span class="highlight-speculative">highlight-speculative</span> secara eksklusif untuk interpretasi subjektif atau proyeksi yang belum dikonfirmasi data mentah.</p>
+
+        <h2>1. Subjudul Analisis Struktural</h2>
+        <p>Di bawah ini adalah contoh penerapan konstitusi visual tabel data untuk memastikan konsistensi antarmuka lintas artikel.</p>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Indikator</th>
+                    <th>Kuartal Sebelumnya</th>
+                    <th>Kuartal Berjalan</th>
+                    <th class="numeric">Pergeseran</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Volume Transaksi</td>
+                    <td>Rp 45.2 Triliun</td>
+                    <td>Rp 48.7 Triliun</td>
+                    <td class="numeric trend-positive">+7.7%</td>
+                </tr>
+                <tr>
+                    <td>Indeks Kepercayaan Kreditor</td>
+                    <td>112.4</td>
+                    <td>108.1</td>
+                    <td class="numeric trend-negative">-3.8%</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <blockquote class="pull-quote">
+            "Manipulasi informasi seringkali bukan berupa kebohongan total, melainkan pemotongan konteks statistik secara presisi."
+        </blockquote>
+    </main>
+
+    <script>
+        window.addEventListener('load', () => {
+            if (typeof initSaintifiksChartDefaults === 'function') {
+                initSaintifiksChartDefaults();
+            }
+        });
+    </script>
+</body>
+</html>
