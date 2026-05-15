@@ -120,28 +120,32 @@
             }
         });
     </script>
-    <script>
+<script>
         window.addEventListener('DOMContentLoaded', () => {
             const startTime = Date.now();
             const articleId = window.location.pathname.split('/').pop().replace('.html', '') || 'beranda';
             
-            // Menggunakan visibilitychange sebagai pemicu paling andal di web modern
             document.addEventListener('visibilitychange', () => {
+                // Memicu transmisi saat tab ditutup atau disembunyikan
                 if (document.visibilityState === 'hidden') {
                     const durationSeconds = Math.floor((Date.now() - startTime) / 1000);
                     
-                    // Abaikan sesi pembacaan kurang dari 5 detik (dianggap bounce/salah klik)
+                    // Abaikan pembacaan di bawah 5 detik (bounce)
                     if (durationSeconds < 5) return;
 
                     const token = localStorage.getItem('saintifiks_token');
                     let identifier = 'anonymous';
                     
-                    // Jika pengguna pernah login, ekstrak email dari token lokal
+                    // Ekstraksi email dari JWT token lokal
                     if (token) {
                         try {
-                            const payload = JSON.parse(atob(token.split('.')[1]));
+                            // Konversi format Base64URL JWT ke Base64 standar sebelum dekripsi
+                            const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+                            const payload = JSON.parse(atob(base64));
                             identifier = payload.email;
-                        } catch (e) {}
+                        } catch (e) {
+                            console.error("[Saintifiks Tracker] Gagal mengekstraksi identitas.", e);
+                        }
                     }
 
                     const payload = {
@@ -153,9 +157,13 @@
                         }
                     };
 
-                    // Eksekusi sendBeacon untuk mem-bypass pemutusan koneksi saat tab ditutup
-                    const blob = new Blob([JSON.stringify(payload)], {type : 'text/plain;charset=utf-8'});
-                    navigator.sendBeacon(GAS_WEB_APP_URL, blob);
+                    // Gunakan fetch dengan parameter keepalive untuk mem-bypass pemutusan koneksi tab
+                    fetch(GAS_WEB_APP_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(payload),
+                        keepalive: true
+                    }).catch(console.error);
                 }
             });
         });
