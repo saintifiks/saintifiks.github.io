@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tentang Kami - Saintifiks</title>
     <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#111111">
+    <meta name="theme-color" content="#111111">
     
     <link rel="stylesheet" href="css/saintifiks.css">
     
@@ -29,31 +29,34 @@
         
         <p>Kami berangkat dari sebuah premis sederhana namun krusial: bahwa di era ledakan informasi, opini publik seringkali tidak terbentuk secara bebas, melainkan dikonstruksi melalui pemotongan konteks statistik secara presisi.</p>
 
+        <!-- PERBAIKAN Bug #5: Dihapus "[cite: 1]" yang bocor ke tampilan publik -->
         <blockquote class="pull-quote">
-            "Mereka punya narasi, kami punya angka." [cite: 1]
+            "Mereka punya narasi, kami punya angka."
         </blockquote>
 
         <h2>Prinsip Epistemik Kami</h2>
         <p>Saintifiks hadir bukan untuk menambah kebisingan narasi, melainkan untuk memberikan jangkar pada realitas struktural. Kami memegang teguh beberapa konstitusi editorial:</p>
         
+        <!-- PERBAIKAN Bug #5: Dihapus semua artefak "[cite: 1]" dan "[cite: 4]" -->
         <ul>
-            <li><strong>Kejujuran Data:</strong> Memisahkan secara absolut antara metrik faktual dan interpretasi spekulatif menggunakan kode visual yang tegas[cite: 1].</li>
-            <li><strong>Realisme Struktural:</strong> Fokus pada analisis makroekonomi dan jurnalisme berbasis data yang mengedepankan objektivitas kuantitatif[cite: 1].</li>
-            <li><strong>Aksesibilitas Intelektual:</strong> Menyediakan platform analisis yang dalam tanpa hambatan akses (barrier to entry) yang tidak perlu[cite: 4].</li>
+            <li><strong>Kejujuran Data:</strong> Memisahkan secara absolut antara metrik faktual dan interpretasi spekulatif menggunakan kode visual yang tegas.</li>
+            <li><strong>Realisme Struktural:</strong> Fokus pada analisis makroekonomi dan jurnalisme berbasis data yang mengedepankan objektivitas kuantitatif.</li>
+            <li><strong>Aksesibilitas Intelektual:</strong> Menyediakan platform analisis yang dalam tanpa hambatan akses yang tidak perlu.</li>
         </ul>
 
         <p style="margin-top: var(--spacing-lg); font-style: italic; color: #555;">
             Saintifiks dikembangkan sebagai platform serverless mandiri, membuktikan bahwa transparansi data berkualitas tinggi dapat dibangun di atas infrastruktur yang jujur dan efisien.
         </p>
     </main>
+
     <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then(registration => console.log('Service Worker terdaftar pada cakupan:', registration.scope))
-        .catch(error => console.error('Kegagalan registrasi Service Worker:', error));
-    });
-  }
-</script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => console.log('Service Worker terdaftar pada cakupan:', registration.scope))
+                    .catch(error => console.error('Kegagalan registrasi Service Worker:', error));
+            });
+        }
+    </script>
 </body>
 </html>
