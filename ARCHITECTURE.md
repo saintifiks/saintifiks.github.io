@@ -22,9 +22,9 @@ Sistem visual bersifat statis dan tertemplate untuk memastikan konsistensi linta
 ## 3. Infrastruktur Teknis
 Berjalan sepenuhnya pada ekosistem *serverless* gratis.
 * **Frontend:** GitHub Pages (`https://saintifiks.github.io`). Host file statis (HTML, CSS, JS).
-* **Backend:** Google Apps Script (GAS) Web App. Bertindak sebagai API untuk validasi logika sisi server (contoh: *one person one like*).
+* **Backend:** Google Apps Script (GAS) Web App. Bertindak sebagai API untuk validasi logika seluruh operasi sisi server (SST).
 * **Database:** Google Sheets (6 tab relasional).
-* **Otentikasi:** Google Identity Services (One Tap Login) diverifikasi melalui ID Token di GAS.
+* **Otentikasi:** Google Identity Services (One Tap Login & Official Button Rendering) diverifikasi melalui ID Token di GAS.
 
 ## 4. Skema Basis Data (Google Sheets)
 Terdapat 6 tab utama yang saling merujuk:
@@ -35,16 +35,16 @@ Terdapat 6 tab utama yang saling merujuk:
 5. `sessions`: `session_id`, `identifier`, `article_id`, `duration_seconds`, `recorded_at`
 6. `subscriptions`: `email`, `subscribed_at`, `is_active`
 
-## 5. Struktur Direktori Repositori (Target)
+## 5. Struktur Direktori Repositori
 ```text
 /
-├── index.html              (Beranda Utama)
-├── tentang.html            (Manifes & Prinsip Editorial)
+├── index.html              (Beranda Utama - Memiliki kontainer profil header)
+├── tentang.html            (Manifes & Prinsip Editorial - Memiliki kontainer profil header)
 ├── css/
 │   └── saintifiks.css      (Konstitusi Visual Global)
 ├── js/
-│   ├── auth.js             (Logika Google One Tap & Token)
-│   ├── api.js              (Komunikasi Fetch POST/GET ke GAS)
+│   ├── auth.js             (Logika Google Sign-In, Dekripsi JWT Lokal, & Render Profil)
+│   ├── api.js              (Komunikasi Fetch POST/GET ke GAS dengan Bypass CORS)
 │   └── saintifiks-charts.js(Konfigurasi Tema Chart.js)
 └── artikel/                (Direktori Konten)
-    └── template.html       (Struktur Baku Artikel Saintifiks)
+    └── template.html       (Struktur Baku Artikel dengan Tombol Reaksi & Komentar Dinamis)
