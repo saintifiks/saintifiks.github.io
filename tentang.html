@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tentang Kami - Saintifiks</title>
+    <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#111111">
     
     <link rel="stylesheet" href="css/saintifiks.css">
     
@@ -44,5 +46,14 @@
             Saintifiks dikembangkan sebagai platform serverless mandiri, membuktikan bahwa transparansi data berkualitas tinggi dapat dibangun di atas infrastruktur yang jujur dan efisien.
         </p>
     </main>
+    <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => console.log('Service Worker terdaftar pada cakupan:', registration.scope))
+        .catch(error => console.error('Kegagalan registrasi Service Worker:', error));
+    });
+  }
+</script>
 </body>
 </html>
