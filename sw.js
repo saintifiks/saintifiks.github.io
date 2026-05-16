@@ -1,7 +1,9 @@
-// PERBAIKAN Bug #11: Versi cache dinaikkan dari v1 ke v2
-// PENTING: Setiap kali Anda mengubah file CSS atau JS apapun,
-// naikkan versi ini (v2 → v3 → v4, dst.) agar pengguna mendapat
-// versi terbaru dan tidak terjebak di cache lama.
+/* ==========================================================================
+   SAINTIFIKS: SERVICE WORKER
+   Versi cache: v2
+   PENTING: Naikkan versi CACHE_NAME setiap kali file CSS/JS berubah.
+   PERBAIKAN: Bug #1 (skipWaiting race condition) + Bug #2 (offline fallback)
+   ========================================================================== */
 
 const CACHE_NAME = 'saintifiks-cache-v2';
 const STATIC_ASSETS = [
@@ -17,11 +19,10 @@ const STATIC_ASSETS = [
 // Instalasi & Pra-penyimpanan (Pre-caching)
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(STATIC_ASSETS);
-        })
+        caches.open(CACHE_NAME)
+            .then((cache) => cache.addAll(STATIC_ASSETS))
+            .then(() => self.skipWaiting()) // FIXED #1: dipanggil hanya setelah cache selesai
     );
-    self.skipWaiting();
 });
 
 // Pembersihan Cache Usang
@@ -50,10 +51,17 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Strategi Network-First untuk navigasi HTML (memastikan artikel selalu terbaru)
-    if (request.mode === 'navigate' || (request.headers.get('accept') && request.headers.get('accept').includes('text/html'))) {
+    // Strategi Network-First untuk navigasi HTML
+    // FIXED #2: jika halaman spesifik tidak ada di cache saat offline,
+    // fallback ke /index.html daripada mengembalikan undefined (yang menyebabkan error browser)
+    if (request.mode === 'navigate' ||
+        (request.headers.get('accept') && request.headers.get('accept').includes('text/html'))) {
         event.respondWith(
-            fetch(request).catch(() => caches.match(request))
+            fetch(request).catch(() =>
+                caches.match(request).then((cached) =>
+                    cached || caches.match('/index.html') // FIXED #2: fallback eksplisit
+                )
+            )
         );
         return;
     }
