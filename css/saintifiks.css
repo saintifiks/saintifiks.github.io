@@ -1,5 +1,6 @@
 /* ==========================================================================
    SAINTIFIKS: KONSTITUSI VISUAL GLOBAL
+   PERBAIKAN: Bug #9 (responsif mobile) + Bug #12 (gaya ul/li)
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
@@ -7,17 +8,17 @@
 :root {
     /* Palet Warna */
     --base-black: #111111;
-    --base-white: #FBFBF9; /* Putih hangat untuk meminimalkan ketegangan mata */
-    --accent-blue: #002EC7; /* Indikator Positif/Naik */
-    --accent-red: #C90203; /* Indikator Negatif/Turun */
-    --accent-yellow: rgba(223, 171, 0, 0.2); /* Highlight Spekulatif (Transparan) */
+    --base-white: #FBFBF9;
+    --accent-blue: #002EC7;
+    --accent-red: #C90203;
+    --accent-yellow: rgba(223, 171, 0, 0.2);
     --border-color: #DDDDDD;
 
     /* Hierarki Tipografi */
     --font-primary: 'Libre Baskerville', serif;
     --font-secondary: 'IBM Plex Mono', monospace;
     --font-tertiary: 'Helvetica', Arial, sans-serif;
-    
+
     /* Spasi & Tata Letak */
     --content-width: 720px;
     --spacing-sm: 8px;
@@ -81,6 +82,21 @@ p {
 }
 
 /* ==========================================================================
+   PERBAIKAN Bug #12: Gaya untuk daftar (ul/li) yang sebelumnya tidak ada
+   Tanpa ini, bullet point di tentang.html tampil tanpa indentasi yang benar
+   ========================================================================== */
+ul, ol {
+    padding-left: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+}
+
+li {
+    margin-bottom: var(--spacing-sm);
+    font-family: var(--font-primary);
+    line-height: 1.7;
+}
+
+/* ==========================================================================
    UTILITAS EDITORIAL & JURNALISME DATA
    ========================================================================== */
 
@@ -140,4 +156,49 @@ p {
     padding-left: var(--spacing-md);
     margin: var(--spacing-lg) 0;
     color: #333;
+}
+
+/* ==========================================================================
+   PERBAIKAN Bug #9: CSS Responsif untuk layar ponsel (lebar < 740px)
+   Sebelumnya tidak ada @media query sama sekali — teks dan tabel akan terpotong
+   di layar ponsel. Ini sangat kritis karena mayoritas pembaca Indonesia
+   mengakses internet via ponsel.
+   ========================================================================== */
+@media (max-width: 740px) {
+    body {
+        font-size: 16px; /* Perkecil sedikit agar muat di layar sempit */
+    }
+
+    h1 {
+        font-size: 1.9rem; /* Dari 2.5rem → 1.9rem agar tidak terpotong */
+    }
+
+    h2 {
+        font-size: 1.4rem; /* Dari 1.8rem → 1.4rem */
+    }
+
+    h3 {
+        font-size: 1.2rem; /* Dari 1.4rem → 1.2rem */
+    }
+
+    .pull-quote {
+        font-size: 1.2rem; /* Dari 1.4rem → 1.2rem */
+    }
+
+    .data-table {
+        font-size: 0.8rem; /* Perkecil font tabel agar muat */
+        /* Tambahkan scroll horizontal jika tabel masih terlalu lebar */
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 6px 8px; /* Kurangi padding agar kolom tidak terlalu rapat */
+    }
+
+    main {
+        padding: var(--spacing-md) var(--spacing-md); /* Kurangi padding atas/bawah */
+    }
 }
