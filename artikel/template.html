@@ -18,7 +18,6 @@
     <script src="../js/saintifiks-charts.js" defer></script>
 
     <style>
-        /* Interaksi statis ikon reaksi */
         #btn-like-icon:hover { transform: scale(1.08); }
         #btn-like-icon:hover #path-heart { stroke-width: 2.5; }
     </style>
@@ -33,7 +32,9 @@
         </div>
     </header>
 
-    <main style="max-width: var(--content-width); margin: 0 auto; padding: 0 var(--spacing-md);">
+    <!-- PERBAIKAN Bug #13: Hapus "padding: 0 var(--spacing-md)" dari inline style di sini.
+         Padding sudah diatur oleh CSS global di saintifiks.css sehingga tidak perlu ditulis dua kali. -->
+    <main>
         
         <span class="kicker">Kategori Makroekonomi</span>
         <h1>Judul Analisis Berbasis Data Menggunakan Libre Baskerville</h1>
@@ -97,6 +98,22 @@
     </main>
 
     <script>
+        // =================================================================
+        // PERBAIKAN Bug #3: Fungsi untuk menetralisir karakter berbahaya
+        // sebelum ditampilkan di halaman.
+        //
+        // Tanpa ini, seseorang bisa mengirim komentar berisi kode HTML/JS
+        // berbahaya yang akan dieksekusi di browser pembaca lain (serangan XSS).
+        // Fungsi ini mengubah karakter seperti < > " & menjadi versi aman
+        // yang hanya ditampilkan sebagai teks biasa, bukan dieksekusi sebagai kode.
+        // =================================================================
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(String(text)));
+            return div.innerHTML;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const articleId = "ART-001"; // Wajib disesuaikan dengan ID di Google Sheets
             
@@ -157,7 +174,10 @@
                    .then(res => {
                        if(res.status === 'success') {
                            countDisplay.innerText = `${res.data.like_count} Reaksi`;
-                           if(res.data.user_has_liked) setLikedState();
+                           // PERBAIKAN Bug #1: Sebelumnya "res.data.user_has_liked" — nama key yang SALAH.
+                           // Backend (kode.gs) mengirim "has_liked", bukan "user_has_liked".
+                           // Akibat typo ini, ikon hati selalu tampil kosong meski sudah pernah like.
+                           if(res.data.has_liked) setLikedState();
                        }
                    }).catch(() => countDisplay.innerText = "0 Reaksi");
             }
@@ -198,13 +218,16 @@
                    .then(res => {
                        if(res.status === 'success') {
                            commentsStatus.innerText = `${res.data.length} Tanggapan Tercatat`;
+                           // PERBAIKAN Bug #3: Semua data dari pengguna (c.name dan c.content)
+                           // sekarang diproses melalui escapeHtml() sebelum dimasukkan ke HTML.
+                           // Ini mencegah serangan XSS di mana komentar berisi kode berbahaya.
                            commentsList.innerHTML = res.data.map(c => `
                                <div style="border-bottom: 1px solid var(--border-color); padding: 12px 0;">
-                                   <strong style="font-family: var(--font-tertiary); font-size: 0.85rem;">${c.name}</strong>
+                                   <strong style="font-family: var(--font-tertiary); font-size: 0.85rem;">${escapeHtml(c.name)}</strong>
                                    <span style="font-family: var(--font-secondary); font-size: 0.75rem; color: #777; margin-left: 8px;">
                                        ${new Date(c.created_at).toLocaleDateString('id-ID')}
                                    </span>
-                                   <p style="font-family: var(--font-primary); font-size: 0.95rem; margin-top: 6px; line-height: 1.5;">${c.content}</p>
+                                   <p style="font-family: var(--font-primary); font-size: 0.95rem; margin-top: 6px; line-height: 1.5;">${escapeHtml(c.content)}</p>
                                </div>
                            `).join('');
                        }
@@ -233,7 +256,7 @@
                            setTimeout(() => {
                                btnSubmitComment.innerText = "KIRIM TANGGAPAN";
                                btnSubmitComment.disabled = false;
-                               window.location.reload(); // Muat ulang untuk melihat komentar baru
+                               window.location.reload();
                            }, 1500);
                        }
                    }).catch(() => {
