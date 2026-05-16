@@ -14,21 +14,6 @@
     
     <script src="../js/api.js" defer></script>
     <script src="../js/auth.js" defer></script>
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-    <script>
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      OneSignalDeferred.push(function(OneSignal) {
-        OneSignal.init({
-          appId: "38d3e4b4-eca0-47e4-9578-572c9f70e958",
-          notifyButton: {
-            enable: false // Mematikan lonceng merah bawaan OneSignal
-          },
-          promptOptions: {
-            autoPrompt: false // Mematikan pop-up instan saat halaman dimuat
-          }
-        });
-      });
-    </script>
     <script src="../js/saintifiks-charts.js" defer></script>
 </head>
 <body>
@@ -79,27 +64,6 @@
         <blockquote class="pull-quote">
             "Manipulasi informasi seringkali bukan berupa kebohongan total, melainkan pemotongan konteks statistik secara presisi."
         </blockquote>
-        <div style="margin: var(--spacing-lg) 0; padding: var(--spacing-md); background-color: #E8ECEF; border-left: 4px solid var(--base-black);">
-            <h4 style="margin-top: 0; font-family: var(--font-tertiary); text-transform: uppercase; font-size: 0.9rem;">Radar Saintifiks</h4>
-            <p style="font-family: var(--font-secondary); font-size: 0.85rem; margin-bottom: var(--spacing-sm);">Dapatkan transmisi analitis langsung ke perangkat Anda saat artikel baru dipublikasikan. Tanpa spam.</p>
-            <button id="btn-subscribe-notif" style="background: var(--base-black); color: var(--base-white); border: none; padding: 6px 12px; font-family: var(--font-tertiary); font-weight: bold; font-size: 0.8rem; text-transform: uppercase; cursor: pointer;">
-                Aktifkan Radar
-            </button>
-        </div>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const btnNotif = document.getElementById('btn-subscribe-notif');
-                if(btnNotif) {
-                    btnNotif.addEventListener('click', () => {
-                        window.OneSignalDeferred.push(function(OneSignal) {
-                            OneSignal.Slidedown.promptPush();
-                        });
-                    });
-                }
-            });
-        </script>
-
         <div style="margin-top: var(--spacing-lg); padding-top: var(--spacing-md); border-top: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px;">
             <button id="btn-like" style="background: var(--base-black); color: var(--base-white); border: none; padding: 8px 16px; font-family: var(--font-tertiary); font-weight: bold; text-transform: uppercase; cursor: pointer;">
                 Berikan Reaksi
