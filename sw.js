@@ -1,3 +1,4 @@
+importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 const CACHE_NAME = 'saintifiks-cache-v1';
 const STATIC_ASSETS = [
   '/',
