@@ -5,10 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Saintifiks | Mereka punya narasi, kami punya angka.</title>
 
+    <!-- FIXED #16: SEO & Open Graph -->
+    <meta name="description" content="Analisis makroekonomi berbasis data. Mereka punya narasi, kami punya angka.">
+    <meta property="og:title" content="Saintifiks — Mereka punya narasi, kami punya angka.">
+    <meta property="og:description" content="Platform jurnalisme berbasis data. Analisis makroekonomi dan realisme struktural.">
+    <meta property="og:image" content="https://saintifiks.github.io/assets/og-image.jpg">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://saintifiks.github.io/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Saintifiks">
+    <meta name="twitter:description" content="Mereka punya narasi, kami punya angka.">
+    <meta name="twitter:image" content="https://saintifiks.github.io/assets/og-image.jpg">
+
+    <!-- FIXED #15: Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' https://accounts.google.com 'unsafe-inline';
+        style-src 'self' https://fonts.googleapis.com 'unsafe-inline';
+        font-src https://fonts.gstatic.com;
+        img-src 'self' https://lh3.googleusercontent.com data:;
+        connect-src 'self' https://script.google.com;
+        frame-src https://accounts.google.com;
+        frame-ancestors 'none';
+    ">
+
     <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#111111">
+    <meta name="theme-color" content="#111111">
+
+    <!-- FIXED #10: Preconnect hints untuk mempercepat koneksi ke Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <link rel="stylesheet" href="css/saintifiks.css">
-    
+
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="js/api.js" defer></script>
     <script src="js/auth.js" defer></script>
@@ -19,12 +48,13 @@
             <div style="font-family: var(--font-primary); font-weight: 700; font-size: 1.5rem; letter-spacing: -1px;">
                 <a href="index.html" style="color: var(--base-black); text-decoration: none;">SAINTIFIKS</a>
             </div>
-            
+
             <div style="display: flex; align-items: center; gap: 20px;">
                 <nav style="font-family: var(--font-tertiary); font-size: 0.85rem; font-weight: bold; text-transform: uppercase;">
                     <a href="tentang.html" style="color: var(--base-black); text-decoration: none;">Tentang Kami</a>
                 </nav>
-                <div id="user-profile-container" style="display: flex; align-items: center;"></div>
+                <!-- FIXED #18 (CLS): min-width mencegah pergeseran tata letak saat widget auth dirender -->
+                <div id="user-profile-container" style="min-width: 80px; display: flex; align-items: center; justify-content: flex-end;"></div>
             </div>
         </div>
     </header>
@@ -33,19 +63,20 @@
         <span class="kicker">Sorotan Utama</span>
         <h1>Realitas Struktural Pasca-Kebijakan Moneter</h1>
         <p>Sebagian besar diskursus publik terjebak pada narasi populis. Analisis ini membedah data mentah untuk melihat <span class="highlight-speculative">kemungkinan perlambatan likuiditas di sektor riil</span> yang tidak terekam dalam ringkasan eksekutif lembaga formal.</p>
-        
+
         <div style="margin-top: var(--spacing-lg); padding-top: var(--spacing-md); border-top: 1px solid var(--border-color);">
             <a href="artikel/template.html" style="color: var(--base-black); font-family: var(--font-tertiary); font-weight: bold; text-decoration: none; text-transform: uppercase; font-size: 0.85rem;">Baca Analisis Penuh &rarr;</a>
         </div>
     </main>
+
     <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then(registration => console.log('Service Worker terdaftar pada cakupan:', registration.scope))
-        .catch(error => console.error('Kegagalan registrasi Service Worker:', error));
-    });
-  }
-</script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => console.log('Service Worker terdaftar pada cakupan:', registration.scope))
+                    .catch(error => console.error('Kegagalan registrasi Service Worker:', error));
+            });
+        }
+    </script>
 </body>
 </html>
