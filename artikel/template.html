@@ -32,8 +32,6 @@
         </div>
     </header>
 
-    <!-- PERBAIKAN Bug #13: Hapus "padding: 0 var(--spacing-md)" dari inline style di sini.
-         Padding sudah diatur oleh CSS global di saintifiks.css sehingga tidak perlu ditulis dua kali. -->
     <main>
         
         <span class="kicker">Kategori Makroekonomi</span>
@@ -81,16 +79,17 @@
                           stroke="var(--base-black)" fill="none" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" />
                 </svg>
             </button>
-            <div id="like-count-display" style="font-family: var(--font-secondary); font-size: 0.85rem; color: #777; margin-top: -5px;">...</div>
+            <div id="like-count-display" style="font-family: var(--font-secondary); font-size: 0.85rem; color: #777; margin-top: -5px;">Memuat...</div>
         </div>
 
 
         <div id="comments-section" style="margin-top: var(--spacing-lg); border-top: 1px solid var(--border-color); padding-top: var(--spacing-md);">
             <h3 style="font-family: var(--font-tertiary); text-transform: uppercase; font-size: 1rem;">Diskusi Publik</h3>
-            <div id="comments-status" style="font-family: var(--font-secondary); font-size: 0.85rem; color: #777; margin-bottom: var(--spacing-sm);">Memuat parameter data...</div>
+            <div id="comments-status" style="font-family: var(--font-secondary); font-size: 0.85rem; color: #777; margin-bottom: var(--spacing-sm);">Memuat komentar...</div>
             
             <textarea id="comment-input" placeholder="Tulis analisis atau tanggapan Anda..." style="width: 100%; min-height: 80px; padding: 10px; font-family: var(--font-primary); font-size: 0.95rem; border: 1px solid var(--border-color); margin-bottom: 10px; resize: vertical;"></textarea>
             <button id="btn-submit-comment" style="background: var(--base-black); color: var(--base-white); border: none; padding: 8px 16px; font-family: var(--font-tertiary); font-weight: bold; font-size: 0.85rem; cursor: pointer; display: block;">KIRIM TANGGAPAN</button>
+            <div id="comment-notice" style="font-family: var(--font-secondary); font-size: 0.8rem; color: #777; margin-top: 8px; display: none;"></div>
             
             <div id="comments-list" style="margin-top: var(--spacing-lg);"></div>
         </div>
@@ -99,13 +98,8 @@
 
     <script>
         // =================================================================
-        // PERBAIKAN Bug #3: Fungsi untuk menetralisir karakter berbahaya
-        // sebelum ditampilkan di halaman.
-        //
-        // Tanpa ini, seseorang bisa mengirim komentar berisi kode HTML/JS
-        // berbahaya yang akan dieksekusi di browser pembaca lain (serangan XSS).
-        // Fungsi ini mengubah karakter seperti < > " & menjadi versi aman
-        // yang hanya ditampilkan sebagai teks biasa, bukan dieksekusi sebagai kode.
+        // UTILITAS: Menetralisir karakter berbahaya sebelum ditampilkan
+        // (Pencegahan serangan XSS)
         // =================================================================
         function escapeHtml(text) {
             if (!text) return '';
@@ -115,7 +109,12 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const articleId = "ART-001"; // Wajib disesuaikan dengan ID di Google Sheets
+            // ============================================================
+            // WAJIB DIGANTI: Sesuaikan dengan ID artikel di Google Sheets
+            // Setiap artikel baru HARUS memiliki ID unik yang berbeda.
+            // Contoh: "ART-002", "ART-003", dst.
+            // ============================================================
+            const articleId = "ART-001";
             
             // ---------------------------------------------------------
             // 1. SISTEM TELEMETRI (KEEPALIVE)
@@ -151,6 +150,11 @@
             const pathHeart = document.getElementById('path-heart');
             const countDisplay = document.getElementById('like-count-display');
 
+            // PERBAIKAN Bug #1: Flag untuk mencegah race condition.
+            // Saat pengguna klik like, flag ini dipasang agar jawaban lambat
+            // dari server tidak menimpa angka yang sudah ditampilkan.
+            let userJustLiked = false;
+
             function setLikedState() {
                 pathHeart.setAttribute('fill', 'var(--base-black)');
                 pathHeart.setAttribute('stroke', 'var(--base-black)');
@@ -173,34 +177,63 @@
                 api.get('get_article_status', { article_id: articleId, email: userEmail })
                    .then(res => {
                        if(res.status === 'success') {
-                           countDisplay.innerText = `${res.data.like_count} Reaksi`;
-                           // PERBAIKAN Bug #1: Sebelumnya "res.data.user_has_liked" — nama key yang SALAH.
-                           // Backend (kode.gs) mengirim "has_liked", bukan "user_has_liked".
-                           // Akibat typo ini, ikon hati selalu tampil kosong meski sudah pernah like.
+                           // PERBAIKAN Bug #1 (Race Condition):
+                           // Hanya perbarui tampilan jika pengguna BELUM klik like.
+                           // Jika sudah klik, biarkan angka optimistic yang tampil.
+                           if (!userJustLiked) {
+                               countDisplay.innerText = `${res.data.like_count} Reaksi`;
+                           }
                            if(res.data.has_liked) setLikedState();
                        }
-                   }).catch(() => countDisplay.innerText = "0 Reaksi");
+                   }).catch(() => {
+                       if (!userJustLiked) {
+                           countDisplay.innerText = "0 Reaksi";
+                       }
+                   });
             }
 
             btnLike.addEventListener('click', () => {
                 const currentToken = localStorage.getItem('saintifiks_token');
-                if (!currentToken) {
+
+                // PERBAIKAN Bug #3: Cek token expired, bukan hanya ada/tidak.
+                // Fungsi isTokenExpired() tersedia dari auth.js yang dimuat lebih awal.
+                const tokenExpired = (typeof isTokenExpired === 'function') && isTokenExpired(currentToken);
+
+                if (!currentToken || tokenExpired) {
+                    // Token tidak ada atau sudah kadaluarsa — paksa login ulang
                     pathHeart.setAttribute('stroke', 'var(--accent-red)');
                     pathHeart.setAttribute('stroke-width', '3');
                     setTimeout(() => {
                         pathHeart.setAttribute('stroke', 'var(--base-black)');
                         pathHeart.setAttribute('stroke-width', '2');
-                        if (typeof google !== 'undefined' && google.accounts.id) google.accounts.id.prompt();
+                        if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+                            google.accounts.id.prompt();
+                        }
                     }, 1000);
                     return;
                 }
 
+                // PERBAIKAN Bug #1: Pasang flag sebelum update UI optimistic.
+                userJustLiked = true;
+
+                // Update UI optimistic (tampilkan perubahan segera tanpa tunggu server)
                 setLikedState();
                 let currentCount = parseInt(countDisplay.innerText) || 0;
                 countDisplay.innerText = `${currentCount + 1} Reaksi`;
 
                 if (typeof api !== 'undefined') {
-                    api.post('like_article', { token: currentToken, article_id: articleId }).catch(() => {});
+                    api.post('like_article', { token: currentToken, article_id: articleId })
+                       .then(res => {
+                           // PERBAIKAN Bug #4: Sinkronkan angka resmi dari server setelah berhasil.
+                           // Ini memastikan angka yang tampil sama persis dengan database.
+                           if (res && res.status === 'success' && res.data && res.data.new_count !== undefined) {
+                               countDisplay.innerText = `${res.data.new_count} Reaksi`;
+                           }
+                       })
+                       .catch(() => {
+                           // Jika gagal total (error jaringan), biarkan angka optimistic
+                           // agar UX tidak terasa rusak. Error sudah di-log oleh api.js.
+                       });
                 }
             });
 
@@ -211,16 +244,18 @@
             const commentsList = document.getElementById('comments-list');
             const btnSubmitComment = document.getElementById('btn-submit-comment');
             const commentInput = document.getElementById('comment-input');
+            const commentNotice = document.getElementById('comment-notice');
 
             // Tarik data komentar
             if (typeof api !== 'undefined') {
                 api.get('get_comments', { article_id: articleId })
                    .then(res => {
                        if(res.status === 'success') {
-                           commentsStatus.innerText = `${res.data.length} Tanggapan Tercatat`;
-                           // PERBAIKAN Bug #3: Semua data dari pengguna (c.name dan c.content)
-                           // sekarang diproses melalui escapeHtml() sebelum dimasukkan ke HTML.
-                           // Ini mencegah serangan XSS di mana komentar berisi kode berbahaya.
+                           if (res.data.length === 0) {
+                               commentsStatus.innerText = 'Belum ada tanggapan. Jadilah yang pertama.';
+                           } else {
+                               commentsStatus.innerText = `${res.data.length} Tanggapan Tercatat`;
+                           }
                            commentsList.innerHTML = res.data.map(c => `
                                <div style="border-bottom: 1px solid var(--border-color); padding: 12px 0;">
                                    <strong style="font-family: var(--font-tertiary); font-size: 0.85rem;">${escapeHtml(c.name)}</strong>
@@ -231,7 +266,9 @@
                                </div>
                            `).join('');
                        }
-                   }).catch(() => commentsStatus.innerText = "Gagal menjangkau pangkalan data komentar.");
+                   }).catch(() => {
+                       commentsStatus.innerText = "Gagal menjangkau pangkalan data komentar.";
+                   });
             }
 
             // Kirim komentar
@@ -239,32 +276,61 @@
                 const currentToken = localStorage.getItem('saintifiks_token');
                 const content = commentInput.value.trim();
                 
-                if (!currentToken) {
-                    if (typeof google !== 'undefined' && google.accounts.id) google.accounts.id.prompt();
+                // Cek login
+                if (!currentToken || (typeof isTokenExpired === 'function' && isTokenExpired(currentToken))) {
+                    commentNotice.style.display = 'block';
+                    commentNotice.style.color = 'var(--accent-red)';
+                    commentNotice.innerText = 'Anda perlu login terlebih dahulu untuk berkomentar.';
+                    if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+                        google.accounts.id.prompt();
+                    }
+                    setTimeout(() => { commentNotice.style.display = 'none'; }, 3000);
                     return;
                 }
-                if (!content) return;
+
+                // Cek isi komentar tidak kosong
+                if (!content) {
+                    commentNotice.style.display = 'block';
+                    commentNotice.style.color = '#777';
+                    commentNotice.innerText = 'Tulis tanggapan Anda terlebih dahulu.';
+                    setTimeout(() => { commentNotice.style.display = 'none'; }, 2000);
+                    return;
+                }
 
                 btnSubmitComment.innerText = "MENGIRIM...";
                 btnSubmitComment.disabled = true;
+                commentNotice.style.display = 'none';
 
                 api.post('add_comment', { token: currentToken, article_id: articleId, content: content })
                    .then(res => {
                        if(res.status === 'success') {
                            commentInput.value = '';
-                           btnSubmitComment.innerText = "TERKIRIM";
+                           btnSubmitComment.innerText = "TERKIRIM ✓";
+
+                           // PERBAIKAN Bug #5: Beri tahu pengguna soal moderasi.
+                           // Sebelumnya langsung reload → komentar tidak muncul → membingungkan.
+                           // Sekarang tampilkan pesan penjelasan, TANPA reload paksa.
+                           commentNotice.style.display = 'block';
+                           commentNotice.style.color = '#555';
+                           commentNotice.innerText = 'Tanggapan Anda berhasil dikirim dan sedang menunggu moderasi sebelum ditayangkan.';
+
                            setTimeout(() => {
                                btnSubmitComment.innerText = "KIRIM TANGGAPAN";
                                btnSubmitComment.disabled = false;
-                               window.location.reload();
-                           }, 1500);
+                               // Tidak reload — komentar memang tidak langsung muncul
+                               // karena perlu disetujui moderator di Google Sheets dulu.
+                           }, 3000);
                        }
                    }).catch(() => {
                        btnSubmitComment.innerText = "GAGAL";
+                       commentNotice.style.display = 'block';
+                       commentNotice.style.color = 'var(--accent-red)';
+                       commentNotice.innerText = 'Gagal mengirim tanggapan. Periksa koneksi internet Anda.';
                        setTimeout(() => {
                            btnSubmitComment.innerText = "KIRIM TANGGAPAN";
                            btnSubmitComment.disabled = false;
-                       }, 2000);
+                           commentNotice.style.display = 'none';
+                       }, 3000);
                    });
             });
         });
