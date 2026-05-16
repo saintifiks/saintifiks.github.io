@@ -4,27 +4,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analisis Struktural - Saintifiks</title>
-    
+
+    <!-- FIXED #6: ID artikel dibaca dari tag meta ini, bukan dari konstanta hardcoded.
+         WAJIB DIGANTI untuk setiap artikel baru. Lebih aman karena berada di bagian
+         <head> yang jelas terpisah dari logika skrip. -->
+    <meta name="article-id" content="ART-001">
+
+    <!-- FIXED #16: SEO & Open Graph — sesuaikan title, description, dan image per artikel -->
+    <meta name="description" content="Analisis makroekonomi berbasis data. Mereka punya narasi, kami punya angka.">
+    <meta property="og:title" content="Analisis Struktural — Saintifiks">
+    <meta property="og:description" content="Analisis makroekonomi berbasis data dari Saintifiks.">
+    <meta property="og:image" content="https://saintifiks.github.io/assets/og-image.jpg">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://saintifiks.github.io/artikel/template.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Analisis Struktural — Saintifiks">
+    <meta name="twitter:description" content="Analisis makroekonomi berbasis data dari Saintifiks.">
+    <meta name="twitter:image" content="https://saintifiks.github.io/assets/og-image.jpg">
+
+    <!-- FIXED #15: Content Security Policy — mencegah eksekusi skrip dari sumber tidak sah.
+         Catatan: unsafe-inline diperlukan selama komentar inline <script> dan atribut style=
+         masih ada. Pindahkan ke file eksternal di iterasi berikutnya untuk menghapus unsafe-inline. -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' https://accounts.google.com https://cdn.jsdelivr.net 'unsafe-inline';
+        style-src 'self' https://fonts.googleapis.com 'unsafe-inline';
+        font-src https://fonts.gstatic.com;
+        img-src 'self' https://lh3.googleusercontent.com data:;
+        connect-src 'self' https://script.google.com;
+        frame-src https://accounts.google.com;
+        frame-ancestors 'none';
+    ">
+
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#111111">
-    
+
+    <!-- FIXED #10: Preconnect hints untuk mempercepat koneksi ke Google Fonts.
+         Tanpa ini browser baru menemukan origin ini saat parsing CSS @import,
+         menambahkan latensi 200–400ms pada pemuatan pertama. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <link rel="stylesheet" href="../css/saintifiks.css">
-    
+
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-   <script
-    src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"
-    integrity="sha384-NrKB+u6Ts6AtkIhwPixiKTzgSKNblyhlk0Sohlgar9UHUBzai/sgnNNWWd291xqt"
-    crossorigin="anonymous"
-    defer>
-</script>
-    
+
+    <!-- FIXED #3: Versi Chart.js dipasang ke 4.4.4 + hash SRI ditambahkan.
+         Ganti REPLACE_WITH_REAL_HASH dengan hash dari https://www.srihash.org/
+         untuk URL: https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"
+        integrity="sha384-NrKB+u6Ts6AtkIhwPixiKTzgSKNblyhlk0Sohlgar9UHUBzai/sgnNNWWd291xqt"
+        crossorigin="anonymous"
+        defer>
+    </script>
+
     <script src="../js/api.js" defer></script>
     <script src="../js/auth.js" defer></script>
     <script src="../js/saintifiks-charts.js" defer></script>
 
     <style>
-        #btn-like-icon:hover { transform: scale(1.08); }
-        #btn-like-icon:hover #path-heart { stroke-width: 2.5; }
+        /* FIXED #8: :not(:disabled) mencegah efek hover tampil pada tombol yang sudah diklik */
+        #btn-like-icon:not(:disabled):hover { transform: scale(1.08); }
+        #btn-like-icon:not(:disabled):hover #path-heart { stroke-width: 2.5; }
     </style>
 </head>
 <body>
@@ -33,15 +75,17 @@
             <div style="font-family: var(--font-primary); font-weight: 700; font-size: 1.5rem; letter-spacing: -1px;">
                 <a href="../index.html" style="color: var(--base-black); text-decoration: none;">SAINTIFIKS</a>
             </div>
-            <div id="user-profile-container" style="display: flex; align-items: center;"></div>
+            <!-- FIXED #18 (CLS): min-width mencegah pergeseran tata letak header saat
+                 konten auth dirender secara async setelah halaman dimuat -->
+            <div id="user-profile-container" style="min-width: 80px; display: flex; align-items: center; justify-content: flex-end;"></div>
         </div>
     </header>
 
     <main>
-        
+
         <span class="kicker">Kategori Makroekonomi</span>
         <h1>Judul Analisis Berbasis Data Menggunakan Libre Baskerville</h1>
-        
+
         <p>Paragraf pembuka. Gunakan kelas <span class="highlight-speculative">highlight-speculative</span> secara eksklusif untuk interpretasi subjektif atau proyeksi yang belum dikonfirmasi data mentah.</p>
 
         <h2>1. Subjudul Analisis Struktural</h2>
@@ -59,15 +103,17 @@
             <tbody>
                 <tr>
                     <td>Volume Transaksi</td>
-                    <td>Rp 45.2 Triliun</td>
-                    <td>Rp 48.7 Triliun</td>
-                    <td class="trend-positive">+7.7%</td>
+                    <!-- FIXED #13: class="numeric" ditambahkan ke sel data kuantitatif
+                         sesuai konvensi jurnalisme data (angka rata kanan) -->
+                    <td class="numeric">Rp 45.2 Triliun</td>
+                    <td class="numeric">Rp 48.7 Triliun</td>
+                    <td class="numeric trend-positive">+7.7%</td>
                 </tr>
                 <tr>
                     <td>Indeks Kepercayaan Kreditor</td>
-                    <td>112.4</td>
-                    <td>108.1</td>
-                    <td class="trend-negative">-3.8%</td>
+                    <td class="numeric">112.4</td>
+                    <td class="numeric">108.1</td>
+                    <td class="numeric trend-negative">-3.8%</td>
                 </tr>
             </tbody>
         </table>
@@ -80,7 +126,7 @@
         <div id="reaction-container" style="margin: var(--spacing-lg) auto var(--spacing-md) auto; text-align: center; border-top: 1px solid var(--border-color); padding-top: var(--spacing-md); max-width: 300px;">
             <button id="btn-like-icon" style="background: transparent; border: none; padding: 10px; cursor: pointer; outline: none; transition: transform 0.2s ease;">
                 <svg id="svg-heart" width="28" height="28" viewBox="0 0 24 24" style="transition: all 0.3s ease;">
-                    <path id="path-heart" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
+                    <path id="path-heart" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
                           stroke="var(--base-black)" fill="none" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" />
                 </svg>
             </button>
@@ -91,11 +137,11 @@
         <div id="comments-section" style="margin-top: var(--spacing-lg); border-top: 1px solid var(--border-color); padding-top: var(--spacing-md);">
             <h3 style="font-family: var(--font-tertiary); text-transform: uppercase; font-size: 1rem;">Diskusi Publik</h3>
             <div id="comments-status" style="font-family: var(--font-secondary); font-size: 0.85rem; color: #777; margin-bottom: var(--spacing-sm);">Memuat komentar...</div>
-            
+
             <textarea id="comment-input" placeholder="Tulis analisis atau tanggapan Anda..." style="width: 100%; min-height: 80px; padding: 10px; font-family: var(--font-primary); font-size: 0.95rem; border: 1px solid var(--border-color); margin-bottom: 10px; resize: vertical;"></textarea>
             <button id="btn-submit-comment" style="background: var(--base-black); color: var(--base-white); border: none; padding: 8px 16px; font-family: var(--font-tertiary); font-weight: bold; font-size: 0.85rem; cursor: pointer; display: block;">KIRIM TANGGAPAN</button>
             <div id="comment-notice" style="font-family: var(--font-secondary); font-size: 0.8rem; color: #777; margin-top: 8px; display: none;"></div>
-            
+
             <div id="comments-list" style="margin-top: var(--spacing-lg);"></div>
         </div>
 
@@ -115,26 +161,35 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             // ============================================================
-            // WAJIB DIGANTI: Sesuaikan dengan ID artikel di Google Sheets
-            // Setiap artikel baru HARUS memiliki ID unik yang berbeda.
-            // Contoh: "ART-002", "ART-003", dst.
+            // FIXED #6: articleId dibaca dari <meta name="article-id">,
+            // bukan dari konstanta hardcoded. Ganti atribut content pada
+            // tag meta di <head> untuk setiap artikel baru.
             // ============================================================
-            const articleId = "ART-001";
-            
+            const articleIdMeta = document.querySelector('meta[name="article-id"]');
+            const articleId = articleIdMeta ? articleIdMeta.getAttribute('content') : null;
+
+            if (!articleId) {
+                console.error('[Saintifiks] FATAL: tag <meta name="article-id"> tidak ditemukan. Semua fitur interaktif dinonaktifkan.');
+                document.getElementById('btn-like-icon').disabled = true;
+                document.getElementById('btn-submit-comment').disabled = true;
+                document.getElementById('like-count-display').textContent = 'ID artikel tidak terkonfigurasi.';
+                return;
+            }
+
             // ---------------------------------------------------------
             // 1. SISTEM TELEMETRI (KEEPALIVE)
             // ---------------------------------------------------------
+            const SESSION_MIN_SECONDS = 5; // named constant, bukan magic number
             const startTime = Date.now();
             window.addEventListener('beforeunload', () => {
                 const durationSeconds = Math.floor((Date.now() - startTime) / 1000);
-                if (durationSeconds >= 5) {
+                if (durationSeconds >= SESSION_MIN_SECONDS) {
                     const token = localStorage.getItem('saintifiks_token');
                     let identifier = 'anonymous';
                     if (token) {
-                        try {
-                            const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-                            identifier = JSON.parse(atob(base64)).email;
-                        } catch (e) {}
+                        // FIXED #5: Gunakan utilitas bersama decodeJwtPayload() dari auth.js
+                        const payload = decodeJwtPayload(token);
+                        if (payload && payload.email) identifier = payload.email;
                     }
                     if (typeof GAS_WEB_APP_URL !== 'undefined') {
                         fetch(GAS_WEB_APP_URL, {
@@ -155,10 +210,11 @@
             const pathHeart = document.getElementById('path-heart');
             const countDisplay = document.getElementById('like-count-display');
 
-            // PERBAIKAN Bug #1: Flag untuk mencegah race condition.
-            // Saat pengguna klik like, flag ini dipasang agar jawaban lambat
-            // dari server tidak menimpa angka yang sudah ditampilkan.
+            // Flag untuk mencegah race condition (respons lambat server tidak menimpa UI)
             let userJustLiked = false;
+
+            // FIXED #7: Simpan hitungan di variabel terpisah — jangan parse dari teks tampilan
+            let currentLikeCount = 0;
 
             function setLikedState() {
                 pathHeart.setAttribute('fill', 'var(--base-black)');
@@ -172,27 +228,27 @@
             let userEmail = '';
             const token = localStorage.getItem('saintifiks_token');
             if (token) {
-                try {
-                    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-                    userEmail = JSON.parse(atob(base64)).email;
-                } catch(e) {}
+                // FIXED #5: Gunakan utilitas bersama
+                const payload = decodeJwtPayload(token);
+                if (payload && payload.email) userEmail = payload.email;
             }
 
             if (typeof api !== 'undefined') {
                 api.get('get_article_status', { article_id: articleId, email: userEmail })
                    .then(res => {
-                       if(res.status === 'success') {
-                           // PERBAIKAN Bug #1 (Race Condition):
-                           // Hanya perbarui tampilan jika pengguna BELUM klik like.
-                           // Jika sudah klik, biarkan angka optimistic yang tampil.
+                       if (res.status === 'success') {
                            if (!userJustLiked) {
-                               countDisplay.innerText = `${res.data.like_count} Reaksi`;
+                               // FIXED #7 + #14: Gunakan variabel, bukan parse teks;
+                               // gunakan textContent, bukan innerText
+                               currentLikeCount = res.data.like_count;
+                               countDisplay.textContent = `${currentLikeCount} Reaksi`;
                            }
-                           if(res.data.has_liked) setLikedState();
+                           if (res.data.has_liked) setLikedState();
                        }
                    }).catch(() => {
                        if (!userJustLiked) {
-                           countDisplay.innerText = "0 Reaksi";
+                           currentLikeCount = 0;
+                           countDisplay.textContent = '0 Reaksi'; // FIXED #14: textContent
                        }
                    });
             }
@@ -200,12 +256,9 @@
             btnLike.addEventListener('click', () => {
                 const currentToken = localStorage.getItem('saintifiks_token');
 
-                // PERBAIKAN Bug #3: Cek token expired, bukan hanya ada/tidak.
-                // Fungsi isTokenExpired() tersedia dari auth.js yang dimuat lebih awal.
                 const tokenExpired = (typeof isTokenExpired === 'function') && isTokenExpired(currentToken);
 
                 if (!currentToken || tokenExpired) {
-                    // Token tidak ada atau sudah kadaluarsa — paksa login ulang
                     pathHeart.setAttribute('stroke', 'var(--accent-red)');
                     pathHeart.setAttribute('stroke-width', '3');
                     setTimeout(() => {
@@ -218,26 +271,24 @@
                     return;
                 }
 
-                // PERBAIKAN Bug #1: Pasang flag sebelum update UI optimistic.
                 userJustLiked = true;
 
-                // Update UI optimistic (tampilkan perubahan segera tanpa tunggu server)
+                // FIXED #7: Increment variabel, bukan parse string dari DOM
+                currentLikeCount += 1;
                 setLikedState();
-                let currentCount = parseInt(countDisplay.innerText) || 0;
-                countDisplay.innerText = `${currentCount + 1} Reaksi`;
+                countDisplay.textContent = `${currentLikeCount} Reaksi`; // FIXED #14: textContent
 
                 if (typeof api !== 'undefined') {
                     api.post('like_article', { token: currentToken, article_id: articleId })
                        .then(res => {
-                           // PERBAIKAN Bug #4: Sinkronkan angka resmi dari server setelah berhasil.
-                           // Ini memastikan angka yang tampil sama persis dengan database.
+                           // FIXED #7: Sinkronkan dengan angka resmi dari server
                            if (res && res.status === 'success' && res.data && res.data.new_count !== undefined) {
-                               countDisplay.innerText = `${res.data.new_count} Reaksi`;
+                               currentLikeCount = res.data.new_count;
+                               countDisplay.textContent = `${currentLikeCount} Reaksi`; // FIXED #14
                            }
                        })
                        .catch(() => {
-                           // Jika gagal total (error jaringan), biarkan angka optimistic
-                           // agar UX tidak terasa rusak. Error sudah di-log oleh api.js.
+                           // Error jaringan: biarkan angka optimistic — sudah di-log oleh api.js
                        });
                 }
             });
@@ -251,15 +302,16 @@
             const commentInput = document.getElementById('comment-input');
             const commentNotice = document.getElementById('comment-notice');
 
-            // Tarik data komentar
+            const NOTICE_TIMEOUT_MS = 3000; // named constant, bukan magic number
+
             if (typeof api !== 'undefined') {
                 api.get('get_comments', { article_id: articleId })
                    .then(res => {
-                       if(res.status === 'success') {
+                       if (res.status === 'success') {
                            if (res.data.length === 0) {
-                               commentsStatus.innerText = 'Belum ada tanggapan. Jadilah yang pertama.';
+                               commentsStatus.textContent = 'Belum ada tanggapan. Jadilah yang pertama.'; // FIXED #14
                            } else {
-                               commentsStatus.innerText = `${res.data.length} Tanggapan Tercatat`;
+                               commentsStatus.textContent = `${res.data.length} Tanggapan Tercatat`; // FIXED #14
                            }
                            commentsList.innerHTML = res.data.map(c => `
                                <div style="border-bottom: 1px solid var(--border-color); padding: 12px 0;">
@@ -272,75 +324,67 @@
                            `).join('');
                        }
                    }).catch(() => {
-                       commentsStatus.innerText = "Gagal menjangkau pangkalan data komentar.";
+                       commentsStatus.textContent = "Gagal menjangkau pangkalan data komentar."; // FIXED #14
                    });
             }
 
-            // Kirim komentar
             btnSubmitComment.addEventListener('click', () => {
                 const currentToken = localStorage.getItem('saintifiks_token');
                 const content = commentInput.value.trim();
-                
-                // Cek login
+
                 if (!currentToken || (typeof isTokenExpired === 'function' && isTokenExpired(currentToken))) {
                     commentNotice.style.display = 'block';
                     commentNotice.style.color = 'var(--accent-red)';
-                    commentNotice.innerText = 'Anda perlu login terlebih dahulu untuk berkomentar.';
+                    commentNotice.textContent = 'Anda perlu login terlebih dahulu untuk berkomentar.'; // FIXED #14
                     if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
                         google.accounts.id.prompt();
                     }
-                    setTimeout(() => { commentNotice.style.display = 'none'; }, 3000);
+                    setTimeout(() => { commentNotice.style.display = 'none'; }, NOTICE_TIMEOUT_MS);
                     return;
                 }
 
-                // Cek isi komentar tidak kosong
                 if (!content) {
                     commentNotice.style.display = 'block';
                     commentNotice.style.color = '#777';
-                    commentNotice.innerText = 'Tulis tanggapan Anda terlebih dahulu.';
+                    commentNotice.textContent = 'Tulis tanggapan Anda terlebih dahulu.'; // FIXED #14
                     setTimeout(() => { commentNotice.style.display = 'none'; }, 2000);
                     return;
                 }
 
-                btnSubmitComment.innerText = "MENGIRIM...";
+                btnSubmitComment.textContent = "MENGIRIM..."; // FIXED #14
                 btnSubmitComment.disabled = true;
                 commentNotice.style.display = 'none';
 
                 api.post('add_comment', { token: currentToken, article_id: articleId, content: content })
                    .then(res => {
-                       if(res.status === 'success') {
+                       if (res.status === 'success') {
                            commentInput.value = '';
-                           btnSubmitComment.innerText = "TERKIRIM ✓";
+                           btnSubmitComment.textContent = "TERKIRIM ✓"; // FIXED #14
 
-                           // PERBAIKAN Bug #5: Beri tahu pengguna soal moderasi.
-                           // Sebelumnya langsung reload → komentar tidak muncul → membingungkan.
-                           // Sekarang tampilkan pesan penjelasan, TANPA reload paksa.
                            commentNotice.style.display = 'block';
                            commentNotice.style.color = '#555';
-                           commentNotice.innerText = 'Tanggapan Anda berhasil dikirim dan sedang menunggu moderasi sebelum ditayangkan.';
+                           commentNotice.textContent = 'Tanggapan Anda berhasil dikirim dan sedang menunggu moderasi sebelum ditayangkan.'; // FIXED #14
 
                            setTimeout(() => {
-                               btnSubmitComment.innerText = "KIRIM TANGGAPAN";
+                               btnSubmitComment.textContent = "KIRIM TANGGAPAN"; // FIXED #14
                                btnSubmitComment.disabled = false;
-                               // Tidak reload — komentar memang tidak langsung muncul
-                               // karena perlu disetujui moderator di Google Sheets dulu.
-                           }, 3000);
+                           }, NOTICE_TIMEOUT_MS);
                        }
                    }).catch(() => {
-                       btnSubmitComment.innerText = "GAGAL";
+                       btnSubmitComment.textContent = "GAGAL"; // FIXED #14
                        commentNotice.style.display = 'block';
                        commentNotice.style.color = 'var(--accent-red)';
-                       commentNotice.innerText = 'Gagal mengirim tanggapan. Periksa koneksi internet Anda.';
+                       commentNotice.textContent = 'Gagal mengirim tanggapan. Periksa koneksi internet Anda.'; // FIXED #14
                        setTimeout(() => {
-                           btnSubmitComment.innerText = "KIRIM TANGGAPAN";
+                           btnSubmitComment.textContent = "KIRIM TANGGAPAN"; // FIXED #14
                            btnSubmitComment.disabled = false;
                            commentNotice.style.display = 'none';
-                       }, 3000);
+                       }, NOTICE_TIMEOUT_MS);
                    });
             });
         });
     </script>
-    
+
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
