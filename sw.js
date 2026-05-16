@@ -38,7 +38,11 @@ self.addEventListener('fetch', (event) => {
   
   // Abaikan request POST (seperti pengiriman API ke GAS)
   if (request.method !== 'GET') return;
-
+  // Larangan Keras: Jangan pernah menyimpan data dinamis API Google Apps Script ke dalam cache
+  if (request.url.includes('script.google.com')) {
+      event.respondWith(fetch(request));
+      return;
+  }
   // Strategi Network-First untuk navigasi HTML (memastikan artikel selalu terbaru)
   if (request.mode === 'navigate' || request.headers.get('accept').includes('text/html')) {
     event.respondWith(
