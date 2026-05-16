@@ -4,11 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tentang Kami - Saintifiks</title>
+
+    <!-- FIXED #16: SEO & Open Graph -->
+    <meta name="description" content="Manifes editorial Saintifiks. Platform jurnalisme berbasis data yang melawan simplifikasi menyesatkan.">
+    <meta property="og:title" content="Tentang Kami — Saintifiks">
+    <meta property="og:description" content="Manifes editorial: melawan simplifikasi yang menyesatkan.">
+    <meta property="og:image" content="https://saintifiks.github.io/assets/og-image.jpg">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://saintifiks.github.io/tentang.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Tentang Kami — Saintifiks">
+    <meta name="twitter:description" content="Manifes editorial: melawan simplifikasi yang menyesatkan.">
+    <meta name="twitter:image" content="https://saintifiks.github.io/assets/og-image.jpg">
+
+    <!-- FIXED #15: Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' https://accounts.google.com 'unsafe-inline';
+        style-src 'self' https://fonts.googleapis.com 'unsafe-inline';
+        font-src https://fonts.gstatic.com;
+        img-src 'self' https://lh3.googleusercontent.com data:;
+        connect-src 'self' https://script.google.com;
+        frame-src https://accounts.google.com;
+        frame-ancestors 'none';
+    ">
+
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#111111">
-    
+
+    <!-- FIXED #10: Preconnect hints untuk mempercepat koneksi ke Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <link rel="stylesheet" href="css/saintifiks.css">
-    
+
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="js/api.js" defer></script>
     <script src="js/auth.js" defer></script>
@@ -19,25 +48,24 @@
             <div style="font-family: var(--font-primary); font-weight: 700; font-size: 1.5rem; letter-spacing: -1px;">
                 <a href="index.html" style="color: var(--base-black); text-decoration: none;">SAINTIFIKS</a>
             </div>
-            <div id="user-profile-container" style="display: flex; align-items: center;"></div>
+            <!-- FIXED #18 (CLS): min-width mencegah pergeseran tata letak saat widget auth dirender -->
+            <div id="user-profile-container" style="min-width: 80px; display: flex; align-items: center; justify-content: flex-end;"></div>
         </div>
     </header>
 
     <main>
         <span class="kicker">Manifes Editorial</span>
         <h1>Melawan Simplifikasi yang Menyesatkan</h1>
-        
+
         <p>Kami berangkat dari sebuah premis sederhana namun krusial: bahwa di era ledakan informasi, opini publik seringkali tidak terbentuk secara bebas, melainkan dikonstruksi melalui pemotongan konteks statistik secara presisi.</p>
 
-        <!-- PERBAIKAN Bug #5: Dihapus "[cite: 1]" yang bocor ke tampilan publik -->
         <blockquote class="pull-quote">
             "Mereka punya narasi, kami punya angka."
         </blockquote>
 
         <h2>Prinsip Epistemik Kami</h2>
         <p>Saintifiks hadir bukan untuk menambah kebisingan narasi, melainkan untuk memberikan jangkar pada realitas struktural. Kami memegang teguh beberapa konstitusi editorial:</p>
-        
-        <!-- PERBAIKAN Bug #5: Dihapus semua artefak "[cite: 1]" dan "[cite: 4]" -->
+
         <ul>
             <li><strong>Kejujuran Data:</strong> Memisahkan secara absolut antara metrik faktual dan interpretasi spekulatif menggunakan kode visual yang tegas.</li>
             <li><strong>Realisme Struktural:</strong> Fokus pada analisis makroekonomi dan jurnalisme berbasis data yang mengedepankan objektivitas kuantitatif.</li>
