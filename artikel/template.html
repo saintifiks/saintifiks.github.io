@@ -169,7 +169,7 @@
             const articleId = articleIdMeta ? articleIdMeta.getAttribute('content') : null;
 
             if (!articleId) {
-                console.error('[Saintifiks] FATAL: tag  tidak ditemukan. Semua fitur interaktif dinonaktifkan.');
+                console.error('[Saintifiks] FATAL: tag <meta name="article-id"> tidak ditemukan. Semua fitur interaktif dinonaktifkan.');
                 document.getElementById('btn-like-icon').disabled = true;
                 document.getElementById('btn-submit-comment').disabled = true;
                 document.getElementById('like-count-display').textContent = 'ID artikel tidak terkonfigurasi.';
