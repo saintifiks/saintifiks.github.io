@@ -2,6 +2,7 @@
   "name": "Saintifiks",
   "short_name": "Saintifiks",
   "description": "Mereka punya narasi, kami punya angka.",
+  "lang": "id",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#FBFBF9",
@@ -10,12 +11,14 @@
     {
       "src": "/assets/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/assets/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
