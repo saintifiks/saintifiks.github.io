@@ -1,35 +1,30 @@
 /* ==========================================================================
    SAINTIFIKS: GOOGLE ONE TAP AUTHENTICATION MODULE
-   PERBAIKAN: #4 (innerHTML XSS) + #5 (JWT padding + shared utility) +
-              #9 (onerror avatar) + #17 (logout) + #18 (CLS min-width)
+   VERSI REMEDIASI: F2 (sessionStorage, bukan localStorage) + F12 (hapus innerHTML)
    ========================================================================== */
 
 const GOOGLE_CLIENT_ID = "217988776417-qkei6r1jaki7cviupgegaop1f4hgldi3.apps.googleusercontent.com";
 
 // --------------------------------------------------------------------------
-// FIXED #5: Utilitas bersama untuk dekode JWT payload dengan padding yang benar.
-// Sebelumnya logika ini disalin di 4 lokasi berbeda tanpa padding — atob()
-// gagal diam-diam pada token yang panjang base64-nya tidak kelipatan 4.
-// Didefinisikan sebagai global agar dapat dipakai oleh template.html.
+// Utilitas bersama untuk dekode JWT payload dengan padding yang benar.
+// Didefinisikan sebagai global agar dapat dipakai oleh article.js.
 // --------------------------------------------------------------------------
 function decodeJwtPayload(token) {
     try {
         const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-        // FIXED #5: tambahkan padding '=' yang hilang sebelum atob()
         const padded = base64 + '=='.substring(0, (4 - base64.length % 4) % 4);
         return JSON.parse(atob(padded));
     } catch (e) {
-        return null; // token tidak dapat dibaca — perlakukan sebagai tidak valid
+        return null;
     }
 }
 
 // --------------------------------------------------------------------------
-// Cek kadaluarsa token — sekarang menggunakan utilitas bersama (FIXED #5)
+// Cek kedaluwarsa token
 // --------------------------------------------------------------------------
 function isTokenExpired(token) {
     const payload = decodeJwtPayload(token);
     if (!payload) return true;
-    // payload.exp dalam detik, Date.now() dalam milidetik
     return (payload.exp * 1000) < Date.now();
 }
 
@@ -40,27 +35,26 @@ function renderUserProfile() {
     const container = document.getElementById('user-profile-container');
     if (!container) return;
 
-    const token = localStorage.getItem('saintifiks_token');
+    // DIPERBAIKI F2: Baca token dari sessionStorage, bukan localStorage.
+    // sessionStorage tidak bertahan lintas tab atau setelah browser ditutup,
+    // sehingga jendela eksploitasi menyempit drastis.
+    const token = sessionStorage.getItem('saintifiks_token');
 
     if (token && !isTokenExpired(token)) {
-        const payload = decodeJwtPayload(token); // FIXED #5: gunakan utilitas bersama
+        const payload = decodeJwtPayload(token);
 
         if (payload) {
             const pictureUrl = payload.picture || '';
             const name = payload.name || 'Pengguna';
 
-            // FIXED #4: Gunakan DOM API (createElement/setAttribute) bukan innerHTML
-            // Ini mencegah karakter " < > di dalam name/pictureUrl memecah HTML atau
-            // memungkinkan injeksi skrip.
             container.innerHTML = '';
 
             const img = document.createElement('img');
             img.src = pictureUrl;
-            img.alt = name;       // setAttribute tidak diperlukan — DOM API aman secara otomatis
+            img.alt = name;
             img.title = name;
             img.style.cssText = 'width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--base-black); object-fit: cover;';
 
-            // FIXED #9: Tangani gambar profil yang gagal dimuat (URL dicabut atau CDN mati)
             img.onerror = () => {
                 img.style.display = 'none';
                 const fallback = document.createElement('span');
@@ -83,11 +77,10 @@ function renderUserProfile() {
 
             container.appendChild(img);
 
-            // FIXED #17: Tambahkan tombol logout agar pengguna bisa keluar secara eksplisit
-            // (penting untuk perangkat bersama)
             const logoutBtn = document.createElement('button');
             logoutBtn.textContent = 'Keluar';
             logoutBtn.title = 'Keluar dari akun';
+            logoutBtn.setAttribute('aria-label', 'Keluar dari akun Saintifiks');
             logoutBtn.style.cssText = [
                 'margin-left: 8px',
                 'background: transparent',
@@ -102,7 +95,8 @@ function renderUserProfile() {
                 'line-height: 1'
             ].join('; ');
             logoutBtn.addEventListener('click', () => {
-                localStorage.removeItem('saintifiks_token');
+                // DIPERBAIKI F2: Hapus dari sessionStorage
+                sessionStorage.removeItem('saintifiks_token');
                 if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
                     google.accounts.id.disableAutoSelect();
                 }
@@ -111,15 +105,15 @@ function renderUserProfile() {
             container.appendChild(logoutBtn);
 
         } else {
-            // Payload tidak bisa didekode — hapus token rusak
-            localStorage.removeItem('saintifiks_token');
+            // DIPERBAIKI F2: Hapus dari sessionStorage
+            sessionStorage.removeItem('saintifiks_token');
             renderLoginButton(container);
         }
     } else {
-        // FIXED #7 (original): Hapus token kadaluarsa dari memori
         if (token) {
-            localStorage.removeItem('saintifiks_token');
-            console.log("[Saintifiks Auth] Token kadaluarsa, meminta login ulang.");
+            // DIPERBAIKI F2: Hapus dari sessionStorage
+            sessionStorage.removeItem('saintifiks_token');
+            console.log("[Saintifiks Auth] Token kedaluwarsa, meminta login ulang.");
         }
         renderLoginButton(container);
     }
@@ -134,14 +128,19 @@ function renderLoginButton(container) {
             { theme: "filled_black", size: "medium", shape: "rectangular", text: "signin" }
         );
     } else {
-        container.innerHTML = `<span style="font-family: var(--font-tertiary); font-size: 0.85rem; font-weight: bold; text-transform: uppercase; color: var(--base-black);">Koneksi Google Terputus</span>`;
+        // DIPERBAIKI F12: Gunakan DOM API, bukan innerHTML, untuk konsistensi konvensi keamanan.
+        const span = document.createElement('span');
+        span.textContent = 'Koneksi Google Terputus';
+        span.style.cssText = 'font-family: var(--font-tertiary); font-size: 0.85rem; font-weight: bold; text-transform: uppercase; color: var(--base-black);';
+        container.appendChild(span);
     }
 }
 
 function handleCredentialResponse(response) {
     console.log("[Saintifiks Auth] Token identitas diterima dari Google.");
 
-    localStorage.setItem('saintifiks_token', response.credential);
+    // DIPERBAIKI F2: Simpan ke sessionStorage, bukan localStorage.
+    sessionStorage.setItem('saintifiks_token', response.credential);
     renderUserProfile();
 
     if (typeof api !== 'undefined') {
@@ -155,7 +154,7 @@ function handleCredentialResponse(response) {
 
 function initGoogleAuth() {
     if (typeof google === 'undefined' || typeof google.accounts === 'undefined') {
-        console.warn("[Saintifiks Auth] Pustaka injeksi Google Sign-In eksternal tidak ditemukan di dokumen HTML.");
+        console.warn("[Saintifiks Auth] Pustaka Google Sign-In tidak ditemukan.");
         return;
     }
 
@@ -165,10 +164,11 @@ function initGoogleAuth() {
         cancel_on_tap_outside: true
     });
 
-    const existingToken = localStorage.getItem('saintifiks_token');
+    // DIPERBAIKI F2: Cek sessionStorage
+    const existingToken = sessionStorage.getItem('saintifiks_token');
 
     if (!existingToken || isTokenExpired(existingToken)) {
-        if (existingToken) localStorage.removeItem('saintifiks_token');
+        if (existingToken) sessionStorage.removeItem('saintifiks_token');
         google.accounts.id.prompt();
     }
 }
