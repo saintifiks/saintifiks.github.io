@@ -5,7 +5,7 @@
    VERSI REMEDIASI: F3 (clients.claim dalam Promise chain) + F4 (pre-cache artikel & font)
    ========================================================================== */
 
-const CACHE_NAME = 'saintifiks-cache-v3';
+const CACHE_NAME = 'saintifiks-cache-v4';
 
 // DIPERBAIKI F4: Tambahkan halaman artikel dan file JS baru (article.js) ke pre-cache.
 // Font dari Google Fonts tidak dapat dipre-cache via addAll karena CORS,
