@@ -13,7 +13,7 @@ const api = {
      */
     post: async function(action, payload) {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 detik
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 detik
 
         try {
             const response = await fetch(GAS_WEB_APP_URL, {
